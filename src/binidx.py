@@ -72,8 +72,9 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
                     self._file.write(np.array(pointers, dtype=np.int64).tobytes(order="C"))
                     self._file.write(np.array(doc_idx, dtype=np.int64).tobytes(order="C"))
 
-                def __exit__(self):
+                def __exit__(self, exc_type, exc_value, traceback):
                     self._file.close()
+
             return _Writer()
 
         def __init__(self, path, skip_warmup=False):

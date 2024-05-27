@@ -1,30 +1,58 @@
 import json, math, random, sys, time, shutil, os, string, re, fileinput
 import numpy as np
+
+"""
+How to use:
+
+python make_data.py demo.jsonl 3 4096
+
+This will:
+==> shuffle & duplicate demo.jsonl (for 3 epochs, good for finetuning) note: this will be very slow for large jsonl and we need more efficient code.
+==> load jsonl and tokenize
+==> save as demo.bin & demo.idx
+==> compute "magic_prime" for ctxlen 4096
+
+Example:
+
+Assume your source jsonl is:
+{"text":"aa"}
+{"text":"bb"}
+{"text":"cc"}
+{"text":"dd"}
+
+The final binidx will be like (here "/" means end_of_doc, which is actually token [0]):
+bb/aa/dd/cc/dd/aa/bb/cc/dd/bb/cc/aa/
+
+where the data is repeated 3 times (each time with different shuffle)
+"""
+
+########################################################################################################
+# MMapIndexedDatasetBuilder
+########################################################################################################
+
 from tokenizer.rwkv_tokenizer import TRIE_TOKENIZER
-from src.binidx import MMapIndexedDataset
-
 tokenizer = TRIE_TOKENIZER("tokenizer/rwkv_vocab_v20230424.txt")
-
+from src.binidx import MMapIndexedDataset
+def index_file_path(prefix_path):
+    return prefix_path + ".idx"
+def data_file_path(prefix_path):
+    return prefix_path + ".bin"
 class MMapIndexedDatasetBuilder(object):
     def __init__(self, out_file, dtype=np.uint16):
         self._data_file = open(out_file, "wb")
         self._dtype = dtype
         self._sizes = []
         self._doc_idx = [0]
-
     def add_item(self, np_array):
         assert np_array.dtype == self._dtype
         self._data_file.write(np_array.tobytes(order="C"))
         self._sizes.append(np_array.size)
-
     def end_document(self):
         self._doc_idx.append(len(self._sizes))
-
     def finalize(self, index_file):
         self._data_file.close()
         with MMapIndexedDataset.Index.writer(index_file, self._dtype) as index:
             index.write(self._sizes, self._doc_idx)
-
 cnt = 0
 def add_raw(raw):
     global builder, cnt
@@ -38,7 +66,6 @@ def add_raw(raw):
     if cnt % 500 == 0:
         print(cnt, end=" ", flush=True)
     cnt += 1
-
 def is_prime(n):
     if n <= 1:
         return False
@@ -52,6 +79,8 @@ def is_prime(n):
             return False
         i += 6
     return True
+
+########################################################################################################
 
 N_EPOCH = int(sys.argv[2].strip())
 IN_FILE = sys.argv[1].strip()
@@ -73,6 +102,8 @@ for i in range(N_EPOCH):
     for entry in non_empty_lines:
         file.write(entry + "\n")
 file.close()
+
+########################################################################################################
 
 print("### Building binidx...")
 

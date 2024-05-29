@@ -31,7 +31,7 @@ def my_save(args, trainer, dd, ff):
                 torch.save(dd, ff)
 
 
-class TrainCallback(pl.Callback):
+class train_callback(pl.Callback):
     def __init__(self, args):
         super().__init__()
         self.args = args

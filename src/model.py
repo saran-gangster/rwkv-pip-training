@@ -1,7 +1,7 @@
 import os
 import math
 import gc
-from mixes import RWKV_CMix_x060, RWKV_Tmix_x060, RWKV_Tmix_x060_state
+from src.mixes import RWKV_CMix_x060, RWKV_Tmix_x060, RWKV_Tmix_x060_state
 
 import torch
 import torch.nn as nn

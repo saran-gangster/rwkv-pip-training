@@ -2,7 +2,7 @@
 from torch.utils.cpp_extension import load
 import torch
 import torch.nn as nn
-from model import USE_JIT, RUN_CUDA_RWKV6 , RUN_CUDA_RWKV6_STATE
+from src.model import USE_JIT, RUN_CUDA_RWKV6 , RUN_CUDA_RWKV6_STATE
 
 if USE_JIT:
     MyModule = torch.jit.ScriptModule

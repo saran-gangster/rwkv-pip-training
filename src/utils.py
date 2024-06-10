@@ -46,7 +46,7 @@ class TOKENIZER():
             context = '\n'
         return context
 
-    def sample_logits(self, out, x, temperature=1.0, top_p_usual=None, top_p_newline=None):
+    def sample_logits(self, out, x, ctx_len, temperature=1.0, top_p_usual=None, top_p_newline=None):
         # out[self.UNKNOWN_CHAR] = -float('Inf')
         lastChar = int(x[-1])
 
@@ -90,7 +90,7 @@ def MaybeIsPrime(number):
 
 def FermatPrimalityTest(number):
     if number > 1:
-        for _ in range(3):
+        for time in range(3):
             randomNumber = random.randint(2, number) - 1
             if pow(randomNumber, number - 1, number) != 1:
                 return False
@@ -110,7 +110,7 @@ def MillerRabinPrimalityTest(number):
         oddPartOfNumber = oddPartOfNumber // 2
         timesTwoDividNumber = timesTwoDividNumber + 1
 
-    for _ in range(3):
+    for time in range(3):
         while True:
             randomNumber = random.randint(2, number) - 1
             if randomNumber != 0 and randomNumber != 1:
